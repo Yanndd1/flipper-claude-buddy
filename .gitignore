@@ -18,3 +18,9 @@ flipper-app/.ufbt/
 
 # AI
 .claude
+
+# Bridge runtime logs (Windows)
+bridge.*.log
+
+# Private planning notes (not published)
+TODO-next.md
