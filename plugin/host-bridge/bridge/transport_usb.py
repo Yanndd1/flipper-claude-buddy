@@ -1,7 +1,8 @@
-"""USB CDC transport — wraps serial_asyncio (extracted from serial_conn.py)."""
+"""USB CDC transport — wraps serial_asyncio. Cross-platform port detection."""
 
 import glob
 import logging
+import sys
 
 import serial_asyncio
 
@@ -10,13 +11,15 @@ from .transport import Transport
 
 log = logging.getLogger(__name__)
 
+# Flipper Zero USB IDs (Momentum & official firmware share the same VID/PID)
+FLIPPER_VID = 0x0483
+FLIPPER_PID = 0x5740
+
 
 class UsbTransport(Transport):
     def __init__(self):
         self._reader = None
         self._writer = None
-
-    # ── Transport interface ────────────────────────────────────────
 
     async def connect(self) -> bool:
         port = self._detect_port()
@@ -61,6 +64,35 @@ class UsbTransport(Transport):
     def _detect_port(self) -> str | None:
         if config.SERIAL_PORT:
             return config.SERIAL_PORT
+
+        if sys.platform == "win32":
+            return self._detect_port_windows()
+
+        # macOS/Linux: glob the pattern, take the highest suffix (Channel 1 = app port)
         ports = sorted(glob.glob(config.SERIAL_GLOB_PATTERN))
-        # Dual CDC: channel 0 = CLI, channel 1 = app (higher suffix)
         return ports[-1] if ports else None
+
+    def _detect_port_windows(self) -> str | None:
+        """Enumerate via pyserial list_ports, filter by Flipper VID/PID.
+
+        Flipper exposes a single CDC port on Windows (COMx). Channels are
+        multiplexed differently than on macOS/Linux dual-port mode.
+        """
+        try:
+            from serial.tools import list_ports
+        except ImportError:
+            log.error("pyserial not available; cannot enumerate ports on Windows")
+            return None
+        candidates = []
+        for info in list_ports.comports():
+            if info.vid == FLIPPER_VID and info.pid == FLIPPER_PID:
+                candidates.append(info.device)
+                log.debug("Found Flipper: %s (%s)", info.device, info.description)
+        if not candidates:
+            return None
+        # Sort by COM number ascending; take the highest (channel 1)
+        try:
+            candidates.sort(key=lambda p: int(p.replace("COM", "")))
+        except Exception:
+            candidates.sort()
+        return candidates[-1]

@@ -1,44 +1,48 @@
 #!/usr/bin/env python3
-"""SubagentStop hook: play distinct tone and show agent result snippet on Flipper."""
+"""SubagentStop hook (Windows port).
+
+Se declenche quand un sub-agent lance via le tool Agent termine. C'est le bon
+hook pour notifier "Claude a fini sa tache" sur les sub-agents (le cas le plus
+frequent), distinct de TaskCompleted qui ne vise que les TaskCreate.
+
+Notifie le Flipper (si bridge running) ET le Xiaozhi (si enabled) en best-effort.
+Aucun ne bloque l'autre : si l'un est indispo, l'autre fonctionne quand meme.
+"""
 
 import json
 import os
-import socket
 import sys
 
-SOCKET_PATH = "/tmp/claude-flipper-bridge.sock"
-
-
-def send_to_flipper(sound: str, text: str, subtext: str = "") -> None:
-    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    s.connect(SOCKET_PATH)
-    msg = json.dumps({"action": "notify", "sound": sound, "vibro": False, "text": text, "subtext": subtext})
-    s.sendall(msg.encode())
-    s.shutdown(socket.SHUT_WR)
-    s.recv(4096)
-    s.close()
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _bridge_client as bc
+import _xiaozhi_client as xz
 
 
 def main():
-    if not os.path.exists(SOCKET_PATH):
-        sys.exit(0)
-
     try:
-        hook_input = json.loads(sys.stdin.read())
-    except (json.JSONDecodeError, EOFError):
-        sys.exit(0)
-
-    agent_type = hook_input.get("agent_type", "Agent")
-    last_msg = hook_input.get("last_assistant_message", "").strip()
-    subtext = last_msg[:21] if last_msg else "stopped"
-
-    try:
-        # alert: single E5 blip + cyan flash, does NOT clear the working indicator
-        send_to_flipper("alert", f"{agent_type} agent", subtext)
+        payload = json.loads(sys.stdin.read())
     except Exception:
-        pass
+        payload = {}
+    agent_type = payload.get("agent_type", "agent")[:30]
+    cwd = payload.get("cwd", "") or os.getcwd()
 
-    sys.exit(0)
+    # 1. Notif Flipper (best-effort)
+    if bc.is_bridge_running():
+        subtext = bc.prefix_with_project(agent_type, cwd)
+        bc.send_fire_and_forget({
+            "action": "notify",
+            "sound": "success",
+            "vibro": False,
+            "text": "Subagent done",
+            "subtext": subtext,
+        })
+
+    # 2. Notif Xiaozhi (best-effort, independant du Flipper). Coupee par defaut
+    # depuis le 2026-10-07 : avec les workflows, une annonce par minute environ.
+    # Reactiver avec la variable utilisateur XIAOZHI_SUBAGENT_NOTIFY=1.
+    if xz.is_enabled() and xz._read_user_env("XIAOZHI_SUBAGENT_NOTIFY", "0") == "1":
+        project = bc.project_name_from_cwd(cwd) or "le projet courant"
+        xz.notify(f"Sous-agent {agent_type} termine sur {project}.", priority="info")
 
 
 if __name__ == "__main__":

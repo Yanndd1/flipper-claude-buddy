@@ -458,6 +458,137 @@ class XdotoolInputBackend(InputBackend):
 
 
 # ---------------------------------------------------------------------------
+# Windows SendInput backend
+# ---------------------------------------------------------------------------
+_VK = {
+    "return": 0x0D, "escape": 0x1B, "down": 0x28, "up": 0x26,
+    "left": 0x25, "right": 0x27, "space": 0x20, "tab": 0x09,
+    "backspace": 0x08, "page_up": 0x21, "page_down": 0x22,
+    "control": 0x11, "shift": 0x10, "alt": 0x12, "lwin": 0x5B,
+}
+
+_MACOS_KEYCODE_TO_VK: dict[int, int] = {
+    8: 0x43, 14: 0x45, 31: 0x4F,
+    36: 0x0D, 48: 0x09, 49: 0x20, 51: 0x08, 53: 0x1B,
+    116: 0x21, 121: 0x22, 125: 0x28,
+}
+
+_MACOS_MOD_TO_WIN_VK: dict[str, int] = {
+    "control down": 0x11, "shift down": 0x10,
+    "option down": 0x12, "command down": 0x5B,
+}
+
+
+def _winapi_modules():
+    import ctypes
+    from ctypes import wintypes
+    PUL = ctypes.POINTER(ctypes.c_ulong)
+
+    class KEYBDINPUT(ctypes.Structure):
+        _fields_ = [("wVk", wintypes.WORD), ("wScan", wintypes.WORD),
+                    ("dwFlags", wintypes.DWORD), ("time", wintypes.DWORD),
+                    ("dwExtraInfo", PUL)]
+
+    class MOUSEINPUT(ctypes.Structure):
+        _fields_ = [("dx", wintypes.LONG), ("dy", wintypes.LONG),
+                    ("mouseData", wintypes.DWORD), ("dwFlags", wintypes.DWORD),
+                    ("time", wintypes.DWORD), ("dwExtraInfo", PUL)]
+
+    class HARDWAREINPUT(ctypes.Structure):
+        _fields_ = [("uMsg", wintypes.DWORD), ("wParamL", wintypes.WORD),
+                    ("wParamH", wintypes.WORD)]
+
+    class _U(ctypes.Union):
+        _fields_ = [("ki", KEYBDINPUT), ("mi", MOUSEINPUT), ("hi", HARDWAREINPUT)]
+
+    class INPUT(ctypes.Structure):
+        _anonymous_ = ("u",)
+        _fields_ = [("type", wintypes.DWORD), ("u", _U)]
+
+    return ctypes, INPUT, KEYBDINPUT
+
+
+def _send_inputs(vk_events):
+    import ctypes
+    ctypes_mod, INPUT_T, KEYBDINPUT_T = _winapi_modules()
+    INPUT_KEYBOARD = 1
+    KEYEVENTF_KEYUP = 0x0002
+    nb = len(vk_events)
+    arr = (INPUT_T * nb)()
+    for i, (vk, down) in enumerate(vk_events):
+        flags = 0 if down else KEYEVENTF_KEYUP
+        arr[i].type = INPUT_KEYBOARD
+        arr[i].u.ki = KEYBDINPUT_T(wVk=vk, wScan=0, dwFlags=flags, time=0, dwExtraInfo=None)
+    ctypes_mod.windll.user32.SendInput(nb, ctypes_mod.byref(arr), ctypes_mod.sizeof(INPUT_T))
+
+
+def _send_unicode_text(text):
+    """Send text char-by-char with a small delay so slow apps (Notepad...) don't drop chars."""
+    import time as _time
+    ctypes_mod, INPUT_T, KEYBDINPUT_T = _winapi_modules()
+    INPUT_KEYBOARD = 1
+    KEYEVENTF_KEYUP = 0x0002
+    KEYEVENTF_UNICODE = 0x0004
+
+    # 2 events per char (down + up) sent in a single SendInput call per char
+    for ch in text:
+        code = ord(ch)
+        arr = (INPUT_T * 2)()
+        arr[0].type = INPUT_KEYBOARD
+        arr[0].u.ki = KEYBDINPUT_T(wVk=0, wScan=code, dwFlags=KEYEVENTF_UNICODE, time=0, dwExtraInfo=None)
+        arr[1].type = INPUT_KEYBOARD
+        arr[1].u.ki = KEYBDINPUT_T(wVk=0, wScan=code, dwFlags=KEYEVENTF_UNICODE | KEYEVENTF_KEYUP, time=0, dwExtraInfo=None)
+        ctypes_mod.windll.user32.SendInput(2, ctypes_mod.byref(arr), ctypes_mod.sizeof(INPUT_T))
+        _time.sleep(0.012)  # 12ms — slow enough for Notepad, imperceptible to the user
+
+
+class WindowsInputBackend(InputBackend):
+    """Windows input backend using Win32 SendInput. Sends to foreground window."""
+
+    def __init__(self) -> None:
+        self._target: InputTarget | None = None
+
+    def set_target(self, target: dict[str, str] | None) -> None:
+        self._target = InputTarget.from_payload(target)
+        log.info("Input target: %s", self._target.describe() if self._target else "foreground")
+
+    async def _exec(self, fn, *args):
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, fn, *args)
+
+    async def send_ctrl_c(self) -> None:
+        await self._exec(_send_inputs, [
+            (_VK["control"], True), (0x43, True),
+            (0x43, False), (_VK["control"], False),
+        ])
+
+    async def send_keystroke(self, key: str) -> None:
+        vk = _VK.get(key)
+        if vk is None:
+            log.warning("Unknown key: %s", key)
+            return
+        await self._exec(_send_inputs, [(vk, True), (vk, False)])
+
+    async def send_text(self, text: str) -> None:
+        await self._exec(_send_unicode_text, text)
+        await self._exec(_send_inputs, [(_VK["return"], True), (_VK["return"], False)])
+
+    async def send_chars(self, text: str, *, focus: bool = True) -> None:
+        await self._exec(_send_unicode_text, text)
+
+    async def send_modified_keystroke(self, key_code: int, modifiers: str) -> None:
+        mod_vk = _MACOS_MOD_TO_WIN_VK.get(modifiers.lower().strip())
+        target_vk = _MACOS_KEYCODE_TO_VK.get(key_code, key_code)
+        if mod_vk is None:
+            await self._exec(_send_inputs, [(target_vk, True), (target_vk, False)])
+        else:
+            await self._exec(_send_inputs, [
+                (mod_vk, True), (target_vk, True),
+                (target_vk, False), (mod_vk, False),
+            ])
+
+
+# ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
 
@@ -474,5 +605,8 @@ def create_backend() -> InputBackend:
             "Install it with: sudo apt install xdotool"
         )
         return NullInputBackend()
+    if sys.platform == "win32":
+        log.info("Input backend: Win32 SendInput")
+        return WindowsInputBackend()
     log.warning("No input backend for platform %r — keystroke forwarding disabled.", sys.platform)
     return NullInputBackend()

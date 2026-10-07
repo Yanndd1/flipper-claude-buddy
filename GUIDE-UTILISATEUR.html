@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide utilisateur — Flipper Claude Buddy (Windows)</title>
+<style>
+:root {
+  --bg: #0d0d0d;
+  --bg-panel: #161616;
+  --bg-elev: #1f1f1f;
+  --border: #2a2a2a;
+  --border-strong: #3a3a3a;
+  --text: #e8e8e8;
+  --text-dim: #a0a0a0;
+  --text-faint: #707070;
+  --accent: #ff8200;
+  --accent-dim: #cc6800;
+  --accent-glow: rgba(255, 130, 0, 0.15);
+  --success: #4ade80;
+  --warn: #fbbf24;
+  --danger: #f87171;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 0;
+  min-height: 100vh;
+}
+.sidebar {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  padding: 28px 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  font-size: 13.5px;
+}
+.sidebar-logo {
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.sidebar-sub {
+  color: var(--text-faint);
+  font-size: 12px;
+  margin-bottom: 22px;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+.toc { padding: 0; }
+.toc > ul { list-style: none; padding-left: 0; margin: 0; }
+.toc ul { list-style: none; padding-left: 14px; margin: 4px 0; border-left: 1px solid var(--border); }
+.toc li { margin: 5px 0; }
+.toc a {
+  color: var(--text-dim);
+  text-decoration: none;
+  display: block;
+  padding: 3px 8px;
+  border-radius: 3px;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  margin-left: -8px;
+}
+.toc a:hover { color: var(--accent); background: var(--accent-glow); border-left-color: var(--accent); }
+.toc > ul > li > a { color: var(--text); font-weight: 600; font-size: 14px; margin-top: 8px; }
+.content { padding: 48px 56px 80px; max-width: 920px; margin: 0 auto; }
+h1, h2, h3, h4, h5, h6 { font-family: 'Inter', system-ui, sans-serif; line-height: 1.3; }
+h1 {
+  font-size: 32px; font-weight: 800; color: var(--accent);
+  letter-spacing: -0.5px; margin: 0 0 6px;
+  padding-bottom: 16px; border-bottom: 2px solid var(--accent);
+}
+h2 {
+  font-size: 24px; font-weight: 700; color: var(--accent);
+  margin-top: 56px; margin-bottom: 14px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--border-strong);
+}
+h3 {
+  font-size: 19px; font-weight: 600; color: var(--text);
+  margin-top: 32px; margin-bottom: 10px;
+}
+h3::before { content: '▸ '; color: var(--accent); }
+h4 { font-size: 16px; color: var(--text); margin-top: 22px; margin-bottom: 8px; }
+h2 .headerlink, h3 .headerlink, h4 .headerlink {
+  margin-left: 8px; color: var(--accent-dim); text-decoration: none;
+  opacity: 0; transition: opacity 0.15s; font-weight: 400;
+}
+h2:hover .headerlink, h3:hover .headerlink, h4:hover .headerlink { opacity: 1; }
+p { margin: 12px 0; }
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
+a:hover { border-bottom-color: var(--accent); }
+strong { color: #fff; font-weight: 700; }
+em { color: var(--text-dim); font-style: italic; }
+ul, ol { padding-left: 24px; margin: 12px 0; }
+li { margin: 6px 0; }
+hr { border: none; border-top: 1px solid var(--border-strong); margin: 40px 0; }
+code {
+  font-family: 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 13px; background: var(--bg-elev); color: var(--accent);
+  padding: 2px 6px; border-radius: 3px; border: 1px solid var(--border);
+}
+pre {
+  background: #1a1a1a; border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--accent); border-radius: 4px;
+  padding: 16px 20px; overflow-x: auto; margin: 16px 0;
+  font-size: 13px; line-height: 1.5;
+}
+pre code { background: transparent; border: none; padding: 0; color: var(--text); font-size: 13px; }
+.codehilite { background: transparent !important; }
+.codehilite pre { margin: 0; }
+table {
+  border-collapse: collapse; width: 100%; margin: 20px 0;
+  font-size: 14px; background: var(--bg-panel); border-radius: 4px;
+  overflow: hidden; border: 1px solid var(--border-strong);
+}
+thead { background: #221409; }
+th {
+  text-align: left; padding: 10px 14px; color: var(--accent);
+  font-weight: 600; border-bottom: 1px solid var(--accent-dim);
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px;
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255, 130, 0, 0.04); }
+blockquote {
+  border-left: 3px solid var(--accent); background: var(--accent-glow);
+  margin: 16px 0; padding: 12px 20px; border-radius: 0 4px 4px 0;
+  color: var(--text-dim);
+}
+blockquote p { margin: 4px 0; }
+blockquote strong { color: var(--accent); }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(13, 13, 13, 0.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border); padding: 10px 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-faint);
+}
+.topbar .device { color: var(--accent); letter-spacing: 0.5px; }
+.topbar .status { display: inline-flex; align-items: center; gap: 6px; }
+.topbar .status::before {
+  content: ''; width: 8px; height: 8px;
+  background: var(--success); border-radius: 50%;
+  box-shadow: 0 0 8px var(--success);
+}
+footer {
+  margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border);
+  color: var(--text-faint); font-size: 12.5px; text-align: center;
+}
+@media print {
+  .sidebar, .topbar { display: none; }
+  .layout { display: block; }
+  .content { padding: 0; max-width: none; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  h1, h2, h3 { color: #c25800; }
+  a { color: #c25800; }
+  pre, code, table { color: #000; background: #f4f4f4; border-color: #ccc; }
+  blockquote { background: #fff8ec; }
+}
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: relative; height: auto; }
+  .content { padding: 24px 18px 60px; }
+  .topbar { padding: 10px 18px; }
+  h1 { font-size: 26px; }
+  h2 { font-size: 21px; margin-top: 40px; }
+  table { font-size: 13px; }
+  th, td { padding: 8px 10px; }
+}
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #49483e }
+.codehilite { background: #272822; color: #F8F8F2 }
+.codehilite .c { color: #959077 } /* Comment */
+.codehilite .err { color: #ED007E; background-color: #1E0010 } /* Error */
+.codehilite .esc { color: #F8F8F2 } /* Escape */
+.codehilite .g { color: #F8F8F2 } /* Generic */
+.codehilite .k { color: #66D9EF } /* Keyword */
+.codehilite .l { color: #AE81FF } /* Literal */
+.codehilite .n { color: #F8F8F2 } /* Name */
+.codehilite .o { color: #FF4689 } /* Operator */
+.codehilite .x { color: #F8F8F2 } /* Other */
+.codehilite .p { color: #F8F8F2 } /* Punctuation */
+.codehilite .ch { color: #959077 } /* Comment.Hashbang */
+.codehilite .cm { color: #959077 } /* Comment.Multiline */
+.codehilite .cp { color: #959077 } /* Comment.Preproc */
+.codehilite .cpf { color: #959077 } /* Comment.PreprocFile */
+.codehilite .c1 { color: #959077 } /* Comment.Single */
+.codehilite .cs { color: #959077 } /* Comment.Special */
+.codehilite .gd { color: #FF4689 } /* Generic.Deleted */
+.codehilite .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
+.codehilite .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #F8F8F2 } /* Generic.Error */
+.codehilite .gh { color: #F8F8F2 } /* Generic.Heading */
+.codehilite .gi { color: #A6E22E } /* Generic.Inserted */
+.codehilite .go { color: #66D9EF } /* Generic.Output */
+.codehilite .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #959077 } /* Generic.Subheading */
+.codehilite .gt { color: #F8F8F2 } /* Generic.Traceback */
+.codehilite .kc { color: #66D9EF } /* Keyword.Constant */
+.codehilite .kd { color: #66D9EF } /* Keyword.Declaration */
+.codehilite .kn { color: #FF4689 } /* Keyword.Namespace */
+.codehilite .kp { color: #66D9EF } /* Keyword.Pseudo */
+.codehilite .kr { color: #66D9EF } /* Keyword.Reserved */
+.codehilite .kt { color: #66D9EF } /* Keyword.Type */
+.codehilite .ld { color: #E6DB74 } /* Literal.Date */
+.codehilite .m { color: #AE81FF } /* Literal.Number */
+.codehilite .s { color: #E6DB74 } /* Literal.String */
+.codehilite .na { color: #A6E22E } /* Name.Attribute */
+.codehilite .nb { color: #F8F8F2 } /* Name.Builtin */
+.codehilite .nc { color: #A6E22E } /* Name.Class */
+.codehilite .no { color: #66D9EF } /* Name.Constant */
+.codehilite .nd { color: #A6E22E } /* Name.Decorator */
+.codehilite .ni { color: #F8F8F2 } /* Name.Entity */
+.codehilite .ne { color: #A6E22E } /* Name.Exception */
+.codehilite .nf { color: #A6E22E } /* Name.Function */
+.codehilite .nl { color: #F8F8F2 } /* Name.Label */
+.codehilite .nn { color: #F8F8F2 } /* Name.Namespace */
+.codehilite .nx { color: #A6E22E } /* Name.Other */
+.codehilite .py { color: #F8F8F2 } /* Name.Property */
+.codehilite .nt { color: #FF4689 } /* Name.Tag */
+.codehilite .nv { color: #F8F8F2 } /* Name.Variable */
+.codehilite .ow { color: #FF4689 } /* Operator.Word */
+.codehilite .pm { color: #F8F8F2 } /* Punctuation.Marker */
+.codehilite .w { color: #F8F8F2 } /* Text.Whitespace */
+.codehilite .mb { color: #AE81FF } /* Literal.Number.Bin */
+.codehilite .mf { color: #AE81FF } /* Literal.Number.Float */
+.codehilite .mh { color: #AE81FF } /* Literal.Number.Hex */
+.codehilite .mi { color: #AE81FF } /* Literal.Number.Integer */
+.codehilite .mo { color: #AE81FF } /* Literal.Number.Oct */
+.codehilite .sa { color: #E6DB74 } /* Literal.String.Affix */
+.codehilite .sb { color: #E6DB74 } /* Literal.String.Backtick */
+.codehilite .sc { color: #E6DB74 } /* Literal.String.Char */
+.codehilite .dl { color: #E6DB74 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #E6DB74 } /* Literal.String.Doc */
+.codehilite .s2 { color: #E6DB74 } /* Literal.String.Double */
+.codehilite .se { color: #AE81FF } /* Literal.String.Escape */
+.codehilite .sh { color: #E6DB74 } /* Literal.String.Heredoc */
+.codehilite .si { color: #E6DB74 } /* Literal.String.Interpol */
+.codehilite .sx { color: #E6DB74 } /* Literal.String.Other */
+.codehilite .sr { color: #E6DB74 } /* Literal.String.Regex */
+.codehilite .s1 { color: #E6DB74 } /* Literal.String.Single */
+.codehilite .ss { color: #E6DB74 } /* Literal.String.Symbol */
+.codehilite .bp { color: #F8F8F2 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #A6E22E } /* Name.Function.Magic */
+.codehilite .vc { color: #F8F8F2 } /* Name.Variable.Class */
+.codehilite .vg { color: #F8F8F2 } /* Name.Variable.Global */
+.codehilite .vi { color: #F8F8F2 } /* Name.Variable.Instance */
+.codehilite .vm { color: #F8F8F2 } /* Name.Variable.Magic */
+.codehilite .il { color: #AE81FF } /* Literal.Number.Integer.Long */</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="device">FLIPPER ZERO · v0.6 .fap</span>
+  <span class="status">READY</span>
+</div>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Claude Buddy</div>
+    <div class="sidebar-sub">v3 Win port</div>
+    <div class="toc"><span class="toctitle">Sommaire</span><ul>
+<li><a href="#1-a-quoi-ca-sert">1. À quoi ça sert ?</a></li>
+<li><a href="#2-architecture">2. Architecture</a></li>
+<li><a href="#3-utilisation-au-quotidien">3. Utilisation au quotidien</a><ul>
+<li><a href="#etape-1-lance-lapp-sur-le-flipper">Étape 1 — Lance l&rsquo;app sur le Flipper</a></li>
+<li><a href="#etape-2-demarre-claude-code-normalement">Étape 2 — Démarre Claude Code normalement</a></li>
+<li><a href="#etape-3-tu-interagis-quand-cest-necessaire">Étape 3 — Tu interagis quand c&rsquo;est nécessaire</a></li>
+<li><a href="#etape-4-fin-de-journee">Étape 4 — Fin de journée</a></li>
+</ul>
+</li>
+<li><a href="#4-multi-projets-qui-demande-quoi">4. Multi-projets — qui demande quoi ?</a></li>
+<li><a href="#5-personnalisation">5. Personnalisation</a><ul>
+<li><a href="#preferences-en-claudesettingsjson">Préférences en ~/.claude/settings.json</a></li>
+<li><a href="#slash-commands-sur-le-flipper">Slash commands sur le Flipper</a></li>
+<li><a href="#ajout-de-commandes-personnelles">Ajout de commandes personnelles</a></li>
+</ul>
+</li>
+<li><a href="#6-depannage">6. Dépannage</a><ul>
+<li><a href="#le-bridge-ne-demarre-pas">&ldquo;Le bridge ne démarre pas&rdquo;</a></li>
+<li><a href="#lapp-sur-le-flipper-ne-recoit-rien">&ldquo;L&rsquo;app sur le Flipper ne reçoit rien&rdquo;</a></li>
+<li><a href="#les-touches-narrivent-pas-dans-la-fenetre-pc">&ldquo;Les touches n&rsquo;arrivent pas dans la fenêtre PC&rdquo;</a></li>
+<li><a href="#les-permissions-sauto-acceptent-sans-passer-par-le-flipper">&ldquo;Les permissions s&rsquo;auto-acceptent sans passer par le Flipper&rdquo;</a></li>
+<li><a href="#verifier-que-tout-tourne">Vérifier que tout tourne</a></li>
+</ul>
+</li>
+<li><a href="#7-securite-et-bonnes-pratiques">7. Sécurité et bonnes pratiques</a></li>
+<li><a href="#8-migration-depuis-la-v2">8. Migration depuis la v2</a></li>
+<li><a href="#9-reference-rapide">9. Référence rapide</a></li>
+<li><a href="#10-differences-avec-macoslinux">10. Différences avec macOS/Linux</a></li>
+</ul>
+</div>
+
+  </aside>
+  <main class="content">
+    <h1 id="guide-utilisateur-flipper-claude-buddy-windows">Guide utilisateur — Flipper Claude Buddy (Windows)<a class="headerlink" href="#guide-utilisateur-flipper-claude-buddy-windows" title="Permanent link">¶</a></h1>
+<blockquote>
+<p>Ton Flipper Zero devient <strong>télécommande + écran d&rsquo;état + valideur de permissions</strong> pour Claude Code. Tout passe par USB.</p>
+</blockquote>
+<hr />
+<h2 id="1-a-quoi-ca-sert">1. À quoi ça sert ?<a class="headerlink" href="#1-a-quoi-ca-sert" title="Permanent link">¶</a></h2>
+<p>Pendant que Claude Code travaille pour toi, plusieurs choses se passent en parallèle : commandes Bash à autoriser, fins de tâches, erreurs, plans à valider, questions ouvertes. Si tu fais autre chose à côté, tu rates ces signaux et Claude reste bloqué.</p>
+<p>Avec ce système :</p>
+<table>
+<thead>
+<tr>
+<th>Tu reçois…</th>
+<th>…sur le Flipper</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Une demande de permission Bash/Edit/Write</td>
+<td>🔐 LED + son + écran affiche <code>Bash</code> / projet / commande. <strong>OK = autoriser</strong>, <strong>Back = refuser</strong></td>
+</tr>
+<tr>
+<td>Une fin de tâche</td>
+<td>✅ Son &ldquo;success&rdquo; + écran &ldquo;Turn complete / X tools&rdquo;</td>
+</tr>
+<tr>
+<td>Une erreur de tool</td>
+<td>⚠️ Son &ldquo;error&rdquo; + écran &ldquo;Tool failed / mon-projet: ToolName&rdquo;</td>
+</tr>
+<tr>
+<td>Une session resumée</td>
+<td>🐬 Son &ldquo;connect&rdquo; + écran &ldquo;Claude Code / Resumed&rdquo;</td>
+</tr>
+<tr>
+<td>Un sous-agent terminé</td>
+<td>🎵 Son &ldquo;task_complete&rdquo; + écran &ldquo;Task done / nom&rdquo;</td>
+</tr>
+</tbody>
+</table>
+<p>Et <strong>tu pilotes</strong> Claude depuis les boutons Flipper :</p>
+<table>
+<thead>
+<tr>
+<th>Bouton</th>
+<th>Action côté PC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OK</strong> (court)</td>
+<td>Envoie <strong>Enter</strong> ⏎</td>
+</tr>
+<tr>
+<td><strong>OK</strong> (long)</td>
+<td>Tape &ldquo;yes&rdquo; puis Enter</td>
+</tr>
+<tr>
+<td><strong>LEFT</strong> (court)</td>
+<td><strong>Escape</strong></td>
+</tr>
+<tr>
+<td><strong>LEFT</strong> (long)</td>
+<td><strong>Ctrl+C</strong> (interruption)</td>
+</tr>
+<tr>
+<td><strong>RIGHT</strong> (long)</td>
+<td>Ouvre le <strong>menu des slash commands</strong> (130 commandes ; tu navigues UP/DOWN, OK pour insérer)</td>
+</tr>
+<tr>
+<td><strong>DOWN</strong> (court)</td>
+<td>Flèche bas ↓</td>
+</tr>
+<tr>
+<td><strong>BACK</strong> (court)</td>
+<td>Backspace ⌫</td>
+</tr>
+<tr>
+<td><strong>BACK</strong> (long)</td>
+<td>Quitte l&rsquo;app sur le Flipper</td>
+</tr>
+<tr>
+<td><strong>UP</strong> (court)</td>
+<td>Voice / Dictée — <em>non disponible sous Windows</em></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-architecture">2. Architecture<a class="headerlink" href="#2-architecture" title="Permanent link">¶</a></h2>
+<div class="codehilite"><pre><span></span><code>┌─────────────────────────────────────────────────────────┐
+│  Claude Code (terminal)                                 │
+│  ├─ 10 hooks Python (~/.claude/settings.json)           │
+│  │   SessionStart, Stop, PermissionRequest, …           │
+│  └─ Chaque hook  ─── TCP 127.0.0.1:47353 ──┐            │
+└──────────────────────────────────────────────│──────────┘
+                                              ▼
+┌─────────────────────────────────────────────────────────┐
+│  Bridge daemon (Python 3.13, sans console)              │
+│  %USERPROFILE%\flipper-claude-buddy-win\plugin\         │
+│         host-bridge\bridge\__main__.py                   │
+│  ├─ IPC TCP côté hooks                                  │
+│  ├─ Win32 SendInput pour keystroke forwarding           │
+│  ├─ Serial CLI ←→ Flipper                               │
+│  └─ Auto-spawn par le hook SessionStart                 │
+└──────────────────────────────────────────────│──────────┘
+                                              ▼ USB CDC (COM15)
+                              JSON v1 newline-delimited
+                              {&quot;v&quot;:1,&quot;t&quot;:&quot;perm&quot;,&quot;d&quot;:{...}}
+                                              ▼
+┌─────────────────────────────────────────────────────────┐
+│  Flipper Zero — app .fap &quot;Claude Buddy&quot; v0.6            │
+│  /ext/apps/USB/claude_buddy.fap                          │
+│  ├─ Affiche état/permission sur l&#39;écran                 │
+│  ├─ Lit boutons et envoie en JSON                       │
+│  └─ Patterns son + vibration + LED                      │
+└─────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p>3 composants installés :</p>
+<table>
+<thead>
+<tr>
+<th>Composant</th>
+<th>Emplacement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>App Flipper <code>.fap</code></td>
+<td><code>/ext/apps/USB/claude_buddy.fap</code> sur la SD du Flipper</td>
+</tr>
+<tr>
+<td>Bridge + hooks Python</td>
+<td><code>%USERPROFILE%\flipper-claude-buddy-win\plugin\</code></td>
+</tr>
+<tr>
+<td>Config hooks Claude Code</td>
+<td><code>%USERPROFILE%\.claude\settings.json</code> (section <code>hooks</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Le bridge se lance <strong>automatiquement</strong> quand tu démarres une session Claude Code (via le hook <code>SessionStart</code> — il vérifie qu&rsquo;il tourne, sinon il le démarre lui-même). Il s&rsquo;arrête quand toutes les sessions sont closes (refcount).</p>
+<hr />
+<h2 id="3-utilisation-au-quotidien">3. Utilisation au quotidien<a class="headerlink" href="#3-utilisation-au-quotidien" title="Permanent link">¶</a></h2>
+<h3 id="etape-1-lance-lapp-sur-le-flipper">Étape 1 — Lance l&rsquo;app sur le Flipper<a class="headerlink" href="#etape-1-lance-lapp-sur-le-flipper" title="Permanent link">¶</a></h3>
+<p>Sur l&rsquo;appareil : <code>Menu → Apps → USB → Claude Buddy</code> → l&rsquo;app affiche son écran d&rsquo;accueil avec la startup fanfare.</p>
+<h3 id="etape-2-demarre-claude-code-normalement">Étape 2 — Démarre Claude Code normalement<a class="headerlink" href="#etape-2-demarre-claude-code-normalement" title="Permanent link">¶</a></h3>
+<p>Dans ton terminal habituel : <code>claude</code> (ou ouvre la session). Au démarrage, tu vois sur le Flipper :
+- Son &ldquo;connect&rdquo;
+- Écran : <code>Claude Code / New session</code> (ou <code>Resumed</code>)</p>
+<p>À partir de là, <strong>tout est automatique</strong> : permissions, fins de tâches, etc. apparaissent sur le Flipper sans intervention.</p>
+<h3 id="etape-3-tu-interagis-quand-cest-necessaire">Étape 3 — Tu interagis quand c&rsquo;est nécessaire<a class="headerlink" href="#etape-3-tu-interagis-quand-cest-necessaire" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Une permission Bash arrive</strong> → OK = autoriser, Back = refuser</li>
+<li><strong>Tu veux taper Enter sans toucher le clavier</strong> → OK</li>
+<li><strong>Tu veux interrompre Claude</strong> → LEFT long (Ctrl+C)</li>
+<li><strong>Tu veux lancer <code>/agents</code> sans taper</strong> → RIGHT long → choisir <code>/agents</code> dans le menu</li>
+</ul>
+<h3 id="etape-4-fin-de-journee">Étape 4 — Fin de journée<a class="headerlink" href="#etape-4-fin-de-journee" title="Permanent link">¶</a></h3>
+<p>Ferme tes sessions Claude Code, le bridge se ferme tout seul.</p>
+<hr />
+<h2 id="4-multi-projets-qui-demande-quoi">4. Multi-projets — qui demande quoi ?<a class="headerlink" href="#4-multi-projets-qui-demande-quoi" title="Permanent link">¶</a></h2>
+<p>Si tu as plusieurs sessions Claude Code ouvertes (un projet par fenêtre), <strong>chaque notification Flipper est préfixée par le nom du projet</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Sans préfixe (avant)</th>
+<th>Avec préfixe (maintenant)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Titre <code>Bash</code><br>Sous-titre <code>dir C:\Users\...</code></td>
+<td>Titre <code>Bash</code><br>Sous-titre <strong><code>Japan_2_: dir C:\...</code></strong></td>
+</tr>
+<tr>
+<td><code>Turn complete</code><br><code>1 Edit 2 Bash</code></td>
+<td><code>Turn complete</code><br><strong><code>Japan_2_: 1 Edit 2</code></strong></td>
+</tr>
+</tbody>
+</table>
+<p>Le préfixe est extrait automatiquement du <code>cwd</code> (current working directory) que chaque hook reçoit dans son payload. Tronqué à 8 caractères pour rester dans les 21 cars max du protocole.</p>
+<blockquote>
+<p><strong>Limitation actuelle</strong> : si plusieurs sessions envoient des notifs en même temps, elles sont traitées en <strong>FIFO</strong> (file unique). Pas de &ldquo;ligne dédiée par projet&rdquo;. Mais grâce au préfixe, tu sais toujours qui est l&rsquo;expéditeur.</p>
+</blockquote>
+<hr />
+<h2 id="5-personnalisation">5. Personnalisation<a class="headerlink" href="#5-personnalisation" title="Permanent link">¶</a></h2>
+<h3 id="preferences-en-claudesettingsjson">Préférences en <code>~/.claude/settings.json</code><a class="headerlink" href="#preferences-en-claudesettingsjson" title="Permanent link">¶</a></h3>
+<p>La section <code>pluginConfigs.flipper-claude-buddy.options</code> permet de configurer :</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">&quot;pluginConfigs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;flipper-claude-buddy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;options&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;bluetoothName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NOM_BLUETOOTH_DU_FLIPPER&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;serial_port&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;transport&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>bluetoothName</code> — auto-détecté au premier <code>hello</code>, utilisé pour BLE</li>
+<li><code>serial_port</code> — laisse vide pour auto-détection. Sinon ex: <code>"COM15"</code></li>
+<li><code>transport</code> — <code>"auto"</code> (recommandé), <code>"usb"</code> ou <code>"ble"</code></li>
+</ul>
+<h3 id="slash-commands-sur-le-flipper">Slash commands sur le Flipper<a class="headerlink" href="#slash-commands-sur-le-flipper" title="Permanent link">¶</a></h3>
+<p>Le menu intégré (RIGHT long) charge automatiquement :
+1. Tous les built-in Claude Code (<code>/help</code>, <code>/clear</code>, <code>/agents</code>, etc.) — 69 commandes
+2. Toutes les commandes de tes plugins activés dans <code>enabledPlugins</code>
+3. Tes skills personnels dans <code>~/.claude/skills/*/SKILL.md</code>
+4. Les commandes spécifiques au projet courant dans <code>&lt;project&gt;/.claude/commands/*.md</code></p>
+<p><strong>Mise à jour</strong> : à chaque démarrage de session, le bridge recharge la liste. Donc ajouter un nouveau plugin = redémarrer la session Claude Code.</p>
+<h3 id="ajout-de-commandes-personnelles">Ajout de commandes personnelles<a class="headerlink" href="#ajout-de-commandes-personnelles" title="Permanent link">¶</a></h3>
+<p>Crée <code>~/.claude/flipper-commands.txt</code> :</p>
+<div class="codehilite"><pre><span></span><code>/mon-raccourci-1
+/mon-raccourci-2
+</code></pre></div>
+
+<p>Elles apparaîtront dans le menu Flipper.</p>
+<hr />
+<h2 id="6-depannage">6. Dépannage<a class="headerlink" href="#6-depannage" title="Permanent link">¶</a></h2>
+<h3 id="le-bridge-ne-demarre-pas">&ldquo;Le bridge ne démarre pas&rdquo;<a class="headerlink" href="#le-bridge-ne-demarre-pas" title="Permanent link">¶</a></h3>
+<ol>
+<li>Vérifier qu&rsquo;aucun autre process ne tient COM15 (qFlipper, terminal serial…)</li>
+<li>Voir le log : <code>Get-Content $env:TEMP\claude-flipper\claude-flipper-bridge.log -Tail 30</code></li>
+<li>Forcer relance : <code>Get-Process | Where-Object { $_.Path -like "*Python313*" } | Stop-Process</code> puis redémarrer une session Claude</li>
+</ol>
+<h3 id="lapp-sur-le-flipper-ne-recoit-rien">&ldquo;L&rsquo;app sur le Flipper ne reçoit rien&rdquo;<a class="headerlink" href="#lapp-sur-le-flipper-ne-recoit-rien" title="Permanent link">¶</a></h3>
+<ol>
+<li>Vérifier que <strong>l&rsquo;app .fap est lancée</strong> sur le Flipper (Apps → USB → Claude Buddy)</li>
+<li>Vérifier dans le log du bridge la ligne <code>Flipper connected: fw=0.1.0 bt=...</code></li>
+<li>Si le bridge reçoit le banner CLI au lieu de JSON, c&rsquo;est que la <code>.fap</code> n&rsquo;est pas en avant-plan sur le Flipper</li>
+</ol>
+<h3 id="les-touches-narrivent-pas-dans-la-fenetre-pc">&ldquo;Les touches n&rsquo;arrivent pas dans la fenêtre PC&rdquo;<a class="headerlink" href="#les-touches-narrivent-pas-dans-la-fenetre-pc" title="Permanent link">¶</a></h3>
+<ul>
+<li>Le keystroke arrive dans la <strong>fenêtre qui a le focus</strong> au moment de l&rsquo;appui. Ce n&rsquo;est pas forcément Claude Code.</li>
+<li>Pour Notepad ou apps lentes, il y a un délai de 12ms par caractère côté bridge — si ça reste lent, augmente la valeur dans <code>bridge\input.py</code> (fonction <code>_send_unicode_text</code>).</li>
+</ul>
+<h3 id="les-permissions-sauto-acceptent-sans-passer-par-le-flipper">&ldquo;Les permissions s&rsquo;auto-acceptent sans passer par le Flipper&rdquo;<a class="headerlink" href="#les-permissions-sauto-acceptent-sans-passer-par-le-flipper" title="Permanent link">¶</a></h3>
+<ul>
+<li>Claude Code a un classifier auto-mode qui décide en amont. Les commandes considérées safe ne déclenchent pas le hook <code>PermissionRequest</code>. C&rsquo;est volontaire.</li>
+<li>Pour forcer le passage : retire les permissions auto dans <code>~/.claude/settings.local.json</code> (<code>permissions.allow</code>).</li>
+</ul>
+<h3 id="verifier-que-tout-tourne">Vérifier que tout tourne<a class="headerlink" href="#verifier-que-tout-tourne" title="Permanent link">¶</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="c"># Le bridge tourne ?</span>
+<span class="nb">Get-Process</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">Path</span> <span class="o">-like</span> <span class="s2">&quot;*Python313*&quot;</span> <span class="p">}</span> <span class="p">|</span> <span class="nb">Select </span><span class="n">Id</span>
+
+<span class="c"># Le port TCP IPC répond ?</span>
+<span class="n">py</span> <span class="p">-</span><span class="n">3</span><span class="p">.</span><span class="n">13</span> <span class="n">-c</span> <span class="s2">&quot;import socket; s=socket.socket(); s.settimeout(1); s.connect((&#39;127.0.0.1&#39;, 47353)); print(&#39;OK&#39;); s.close()&quot;</span>
+
+<span class="c"># Envoyer une notif test</span>
+<span class="n">py</span> <span class="p">-</span><span class="n">3</span><span class="p">.</span><span class="n">13</span> <span class="n">-c</span> <span class="s2">&quot;import socket, json; s=socket.socket(); s.connect((&#39;127.0.0.1&#39;, 47353)); s.sendall(json.dumps({&#39;action&#39;:&#39;notify&#39;,&#39;sound&#39;:&#39;success&#39;,&#39;vibro&#39;:True,&#39;text&#39;:&#39;Test&#39;,&#39;subtext&#39;:&#39;OK&#39;}).encode()); s.shutdown(socket.SHUT_WR); print(s.recv(4096).decode())&quot;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="7-securite-et-bonnes-pratiques">7. Sécurité et bonnes pratiques<a class="headerlink" href="#7-securite-et-bonnes-pratiques" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>Tout reste en local</strong> — TCP localhost + USB. Rien ne sort de ta machine.</li>
+<li><strong>Failover propre</strong> — Si le bridge n&rsquo;est pas joignable ou que le Flipper n&rsquo;est pas connecté, le hook <code>permission-request</code> renvoie un statut &ldquo;ask&rdquo; → Claude Code affiche son dialog habituel et tu réponds depuis le terminal. <strong>Pas de blocage.</strong></li>
+<li><strong>Refcount sur les sessions</strong> — Le bridge ne tourne que quand au moins une session Claude Code est ouverte.</li>
+</ul>
+<hr />
+<h2 id="8-migration-depuis-la-v2">8. Migration depuis la v2<a class="headerlink" href="#8-migration-depuis-la-v2" title="Permanent link">¶</a></h2>
+<p>Si tu reviens à notre v2 maison :
+- Backup v2 : <code>%USERPROFILE%\flipper-claude-v2-backup\</code>
+- Pour revenir : remplace le bloc <code>hooks</code> dans <code>~/.claude/settings.json</code> par les anciens hooks pointant vers <code>%USERPROFILE%\.claude\hooks\flipper_notify.py</code>, et arrête le bridge actuel.</p>
+<p>Mais aucune raison de revenir — v3 a 5× plus de fonctions et le texte affiché à l&rsquo;écran.</p>
+<hr />
+<h2 id="9-reference-rapide">9. Référence rapide<a class="headerlink" href="#9-reference-rapide" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Commande</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Voir le log bridge</td>
+<td><code>Get-Content $env:TEMP\claude-flipper\claude-flipper-bridge.log -Tail 20 -Wait</code></td>
+</tr>
+<tr>
+<td>Tuer le bridge</td>
+<td><code>Get-Process \| Where-Object { $_.Path -like "*Python313*" } \| Stop-Process</code></td>
+</tr>
+<tr>
+<td>Tester ping bridge</td>
+<td><code>py -3.13 -c "import socket; s=socket.socket(); s.connect(('127.0.0.1', 47353)); print('OK')"</code></td>
+</tr>
+<tr>
+<td>Mettre à jour la <code>.fap</code></td>
+<td>Télécharge le nouveau release Buddy puis recopie via qFlipper ou <code>push_fap.py</code></td>
+</tr>
+<tr>
+<td>Voir les commandes chargées dans le menu</td>
+<td>Le log du bridge dit <code>Loaded 130 commands (69 built-in + 61 custom)</code></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Fichier</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>%USERPROFILE%\flipper-claude-buddy-win\plugin\host-bridge\bridge\</code></td>
+<td>Code du bridge</td>
+</tr>
+<tr>
+<td><code>%USERPROFILE%\flipper-claude-buddy-win\plugin\scripts\</code></td>
+<td>Hooks Python</td>
+</tr>
+<tr>
+<td><code>%USERPROFILE%\.claude\settings.json</code></td>
+<td>Config Claude Code (hooks + plugin options)</td>
+</tr>
+<tr>
+<td><code>%TEMP%\claude-flipper\</code></td>
+<td>Fichiers runtime (log, pid, refcount, turn stats)</td>
+</tr>
+<tr>
+<td><code>/ext/apps/USB/claude_buddy.fap</code> (sur Flipper)</td>
+<td>App .fap v0.6</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-differences-avec-macoslinux">10. Différences avec macOS/Linux<a class="headerlink" href="#10-differences-avec-macoslinux" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Windows (toi)</th>
+<th>macOS/Linux (original)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IPC entre hooks et bridge</td>
+<td>TCP <code>127.0.0.1:47353</code></td>
+<td>Unix socket <code>/tmp/claude-flipper-bridge.sock</code></td>
+</tr>
+<tr>
+<td>Keystroke forwarding</td>
+<td>Win32 <code>SendInput</code> (ctypes)</td>
+<td><code>osascript</code> (macOS) / <code>xdotool</code> (Linux X11)</td>
+</tr>
+<tr>
+<td>USB port detection</td>
+<td><code>pyserial.tools.list_ports</code> filtré sur VID <code>0483</code> / PID <code>5740</code></td>
+<td>Glob <code>/dev/cu.usbmodem*</code> ou <code>/dev/ttyACM*</code></td>
+</tr>
+<tr>
+<td>Dictation (UP button)</td>
+<td>Désactivée — pas d&rsquo;API native simple</td>
+<td>macOS native, Linux custom</td>
+</tr>
+<tr>
+<td>Plugin marketplace</td>
+<td>Installation manuelle</td>
+<td><code>claude plugin install</code> (à tester)</td>
+</tr>
+<tr>
+<td>Signaux asyncio</td>
+<td>Désactivés (Windows ne supporte pas SIGINT via asyncio)</td>
+<td>Activés</td>
+</tr>
+</tbody>
+</table>
+<p>Cette adaptation Windows a été codée à partir du fork upstream <code>jxw1102/flipper-claude-buddy</code> (MIT). Le code patché est dans <code>%USERPROFILE%\flipper-claude-buddy-win</code>.</p>
+<hr />
+<p><em>Document généré le 27/05/2026 · Flipper Claude Buddy v3 (port Windows) · Bridge Python 3.13 · App .fap v0.6</em></p>
+    <footer>
+      Document généré · Style inspiré de qFlipper · HTML/CSS vanilla, single-file.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
