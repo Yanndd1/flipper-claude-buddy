@@ -14,6 +14,8 @@ log = logging.getLogger(__name__)
 # Flipper Zero USB IDs (Momentum & official firmware share the same VID/PID)
 FLIPPER_VID = 0x0483
 FLIPPER_PID = 0x5740
+# USB serial number prefix ("flip_<device name>"), compared lowercase
+FLIPPER_SERIAL_PREFIX = "flip_"
 
 
 class UsbTransport(Transport):
@@ -73,10 +75,14 @@ class UsbTransport(Transport):
         return ports[-1] if ports else None
 
     def _detect_port_windows(self) -> str | None:
-        """Enumerate via pyserial list_ports, filter by Flipper VID/PID.
+        """Enumerate via pyserial list_ports, filter by Flipper VID/PID and serial.
 
         Flipper exposes a single CDC port on Windows (COMx). Channels are
         multiplexed differently than on macOS/Linux dual-port mode.
+
+        0483:5740 is the generic STM32 virtual COM port ID, shared by other
+        devices (e.g. VESC motor controllers), so the USB serial number must
+        also start with "flip_" (Flipper uses "flip_<device name>").
         """
         try:
             from serial.tools import list_ports
@@ -86,6 +92,10 @@ class UsbTransport(Transport):
         candidates = []
         for info in list_ports.comports():
             if info.vid == FLIPPER_VID and info.pid == FLIPPER_PID:
+                if not (info.serial_number or "").lower().startswith(FLIPPER_SERIAL_PREFIX):
+                    log.debug("Skipping non-Flipper STM32 port %s (serial %r)",
+                              info.device, info.serial_number)
+                    continue
                 candidates.append(info.device)
                 log.debug("Found Flipper: %s (%s)", info.device, info.description)
         if not candidates:
